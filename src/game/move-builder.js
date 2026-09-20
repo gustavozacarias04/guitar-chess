@@ -58,15 +58,15 @@ export class MoveBuilder extends EventTarget {
             const square = this.origin
             const piece = this.game.pieceAt(square)
             if (!piece) {
-                this.reject(`${square} está vazia`)
+                this.reject(`${square} is empty`)
                 return
             }
             if (piece.color !== this.game.turn) {
-                this.reject(`${square} não é uma peça tua`)
+                this.reject(`${square} is not your piece`)
                 return
             }
             if (this.game.legalMovesFrom(square).length === 0) {
-                this.reject(`a peça em ${square} não tem jogadas legais`)
+                this.reject(`the piece on ${square} has no legal moves`)
                 return
             }
         }
@@ -78,7 +78,7 @@ export class MoveBuilder extends EventTarget {
             if (!legal) {
                 this.slots.length = 2 // keep the origin, ask for a new destination
                 this.restartTimer()
-                this.emit("rejected", { reason: `${from}${to} não é legal`, keepOrigin: true })
+                this.emit("rejected", { reason: `${from}${to} is not legal`, keepOrigin: true })
                 this.emit("update", this.snapshot())
                 return
             }

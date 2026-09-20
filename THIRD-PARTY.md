@@ -1,30 +1,30 @@
-# Componentes de terceiros
+# Third-party components
 
-Todas as dependências estão versionadas em `vendor/`, tal como foram publicadas, sem
-modificações. O texto integral de cada licença está junto ao respetivo código.
+Every dependency is committed under `vendor/` exactly as published, unmodified. The full text of
+each licence sits next to the code it covers.
 
-| Componente | Versão | Licença | Origem | Onde |
+| Component | Version | Licence | Upstream | Location |
 |---|---|---|---|---|
 | chess.js | 1.4.0 | BSD-2-Clause | <https://github.com/jhlywa/chess.js> | `vendor/chess.js/` |
 | cm-chessboard | 8.14.0 | MIT | <https://github.com/shaack/cm-chessboard> | `vendor/cm-chessboard/` |
 | stockfish.js | 10.0.2 | GPL-3.0 | <https://github.com/nmrugg/stockfish.js> | `vendor/stockfish/` |
 
-`stockfish.js` é uma compilação para WebAssembly do [Stockfish](https://stockfishchess.org/),
-copyright T. Romstad, M. Costalba, J. Kiiski, G. Linscott e restantes contribuidores, com o
-suporte multi-variante de Daniel Dugovic e contribuidores.
+`stockfish.js` is a WebAssembly build of [Stockfish](https://stockfishchess.org/), copyright
+T. Romstad, M. Costalba, J. Kiiski, G. Linscott and other contributors, with multi-variant
+support by Daniel Dugovic and contributors.
 
-Por o Stockfish ser GPL-3.0, o conjunto distribuído neste repositório é licenciado sob
-GPL-3.0-or-later. Ver `LICENSE`.
+Because Stockfish is GPL-3.0, the combined work distributed from this repository is licensed
+under GPL-3.0-or-later. See `LICENSE`.
 
-## Ficheiros de licença
+## Licence files
 
 - `vendor/chess.js/LICENSE`
 - `vendor/cm-chessboard/LICENSE`
-- O cabeçalho de `vendor/stockfish/stockfish.wasm.js` e `vendor/stockfish/stockfish.js` declara a
-  GPL-3.0; o texto completo está em `LICENSE`.
+- The headers of `vendor/stockfish/stockfish.wasm.js` and `vendor/stockfish/stockfish.js` declare
+  GPL-3.0; the full text is in `LICENSE`.
 
-## Atualizar uma dependência
+## Updating a dependency
 
-Os ficheiros foram obtidos do jsDelivr a partir dos pacotes npm correspondentes. Para atualizar,
-substitui os ficheiros em `vendor/<pacote>/` pela nova versão, mantendo a mesma estrutura de
-diretórios (os caminhos dos imports dependem dela), e atualiza a tabela acima.
+These files came from jsDelivr, from the matching npm packages. To update, replace the files in
+`vendor/<package>/` with the new version keeping the same directory structure (the import paths
+depend on it), and update the table above.

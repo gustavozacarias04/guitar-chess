@@ -1,167 +1,178 @@
 # Guitar Chess
 
-Joga xadrez tocando guitarra. O browser ouve o microfone (ou a entrada de linha / interface
-áudio), deteta a frequência de cada nota e traduz cada quatro notas numa jogada.
+**Play chess by playing your guitar.** The browser listens to your microphone, audio interface
+or line input, works out which note you played, and turns every four notes into a move.
 
-> *Play chess with your guitar: the browser listens, detects the pitch of each note and turns
-> every four notes into a move. Runs entirely client-side, no build step, no server.*
+**[Play it here](https://gustavozacarias04.github.io/guitar-chess/)** — nothing to install.
 
-Sem build, sem npm, sem backend — é HTML e módulos ES. Clona e abre.
+No build step, no npm, no backend. It is HTML and ES modules: clone it and open it.
 
 ---
 
-## Como se joga
+## How to play
 
-Uma jogada são **quatro notas**:
+A move is **four notes**:
 
-| Nota | Significado |
+| Note | Meaning |
 |---|---|
-| 1ª | **coluna** da peça que queres mover (a–h) |
-| 2ª | **linha** da peça (1–8) |
-| 3ª | **coluna** do destino |
-| 4ª | **linha** do destino |
+| 1st | **file** of the piece you want to move (a–h) |
+| 2nd | **rank** of that piece (1–8) |
+| 3rd | **file** of the destination |
+| 4th | **rank** of the destination |
 
-Para jogar `e2e4`: **F#3** (e), **G2** (2), **F#3** (e), **C#3** (4).
+To play `e2e4`: **F#3** (e), **G2** (2), **F#3** (e), **C#3** (4).
 
-Oito notas chegam para tudo, porque a mesma nota serve de coluna e de linha conforme a posição
-em que aparece:
+Eight notes cover the whole board, because the same note means a file or a rank depending on
+where it lands in the sequence:
 
-| Nota | Freq. | Coluna | Linha | Onde tocar (afinação standard) |
+| Note | Freq. | File | Rank | Where to play it (standard tuning) |
 |---|---|---|---|---|
-| E2  | 82.4 Hz  | a | 1 | 6ª corda, solta |
-| G2  | 98.0 Hz  | b | 2 | 6ª corda, traste 3 |
-| A#2 | 116.5 Hz | c | 3 | 5ª corda, traste 1 |
-| C#3 | 138.6 Hz | d | 4 | 5ª corda, traste 4 |
-| F#3 | 185.0 Hz | e | 5 | 4ª corda, traste 4 |
-| A3  | 220.0 Hz | f | 6 | 3ª corda, traste 2 |
-| C4  | 261.6 Hz | g | 7 | 3ª corda, traste 5 |
-| D#4 | 311.1 Hz | h | 8 | 2ª corda, traste 4 |
-| **B4** | **493.9 Hz** | *cancelar a jogada* | | 1ª corda, traste 7 |
+| E2  | 82.4 Hz  | a | 1 | 6th string, open |
+| G2  | 98.0 Hz  | b | 2 | 6th string, fret 3 |
+| A#2 | 116.5 Hz | c | 3 | 5th string, fret 1 |
+| C#3 | 138.6 Hz | d | 4 | 5th string, fret 4 |
+| F#3 | 185.0 Hz | e | 5 | 4th string, fret 4 |
+| A3  | 220.0 Hz | f | 6 | 3rd string, fret 2 |
+| C4  | 261.6 Hz | g | 7 | 3rd string, fret 5 |
+| D#4 | 311.1 Hz | h | 8 | 2nd string, fret 4 |
+| **B4** | **493.9 Hz** | *cancel the move* | | 1st string, fret 7 |
 
-Tudo nos primeiros sete trastes. A nota de cancelamento limpa a jogada em curso; quatro segundos
-de silêncio fazem o mesmo.
+Everything sits in the first seven frets. You never have to remember the table: the neck diagram
+is on screen the whole time, and the app dims every note that cannot come next.
 
-O tabuleiro vai mostrando o que foi ouvido: depois da 1ª nota acende-se a coluna inteira, depois
-da 2ª acende-se a casa escolhida e todos os destinos legais dessa peça.
+**First run** walks you through it in three steps — pick an input, play the eight notes once
+(which is also how it learns your guitar), then a two-square drill to prove it works. It takes
+about a minute and never appears again.
 
-### Enganos
+### When you play a wrong note
 
-- Se as duas primeiras notas derem uma casa vazia, uma peça do adversário ou uma peça sem jogadas
-  legais, a jogada é recusada logo ali — não tens de esperar pelas quatro notas.
-- Se o destino for ilegal, só o destino é descartado: a peça continua selecionada.
-- A nota de cancelamento (B4) limpa tudo.
+- If the first two notes land on an empty square, an opponent piece, or a piece with no legal
+  moves, the move is rejected immediately — you do not have to finish all four notes.
+- If the destination is illegal, only the destination is dropped; the piece stays selected.
+- Play **B4** to clear the move. Four seconds of silence does the same.
+
+### Stage mode
+
+A button in the top bar hides everything except the board, the neck and the current move, and
+goes fullscreen. Made for recording and for showing it on a projector.
 
 ---
 
-## Correr localmente
+## Run it locally
 
 ```bash
 python serve.py
 ```
 
-Abre <http://localhost:8000>. Qualquer servidor estático serve; o `serve.py` existe só para não
-precisares de instalar nada (define o MIME do WebAssembly e desliga a cache).
+Then open <http://localhost:8000>. Any static server works; `serve.py` exists so a fresh clone
+needs nothing installed (it sets the WebAssembly MIME type and disables caching).
 
-> Não abras o `index.html` com duplo clique: módulos ES, AudioWorklet e o microfone exigem
-> `http://` ou `https://`.
+> Do not open `index.html` by double-clicking it. ES modules, AudioWorklet and microphone access
+> all require `http://` or `https://`.
 
-O acesso ao microfone precisa de um contexto seguro — `localhost` conta como tal, e em produção
-tem de ser HTTPS (o GitHub Pages já é).
+Microphone access needs a secure context — `localhost` counts, and in production it has to be
+HTTPS (GitHub Pages already is).
 
-### Publicar
+### Deploying
 
-Não há passo de build: `Settings → Pages → Deploy from a branch → main / root` e está feito.
-
----
-
-## Afinação e calibração
-
-O preset assume afinação standard a 440 Hz. Se tocas ligeiramente baixo, tens cordas de nylon,
-ou a intonação não está perfeita, carrega em **Calibrar notas**: tocas as nove notas uma a uma e
-a app guarda a frequência *medida* de cada uma (mediana de 12 leituras, o que ignora o transiente
-do ataque). Fica guardado no `localStorage` do browser.
-
-Dois controlos ajudam quando o ambiente não coopera:
-
-- **Limiar de ruído** — sobe-o numa sala barulhenta ou se notas fantasma aparecerem sozinhas;
-  desce-o se tiveres de tocar com muita força para ser ouvido.
-- **Tolerância** — largura da janela de aceitação em cents. As notas estão a 300 cents umas das
-  outras, por isso 100 cents é folgado e seguro.
+There is no build: `Settings → Pages → Deploy from a branch → main / root` and it is live.
 
 ---
 
-## Porquê assim (as decisões que interessam)
+## Tuning and calibration
 
-**Autocorrelação em vez de FFT.** Numa guitarra, a fundamental de uma corda grave entrelaçada é
-muitas vezes *mais fraca* que o 2º ou o 3º harmónico. Um detetor que escolha o pico mais alto do
-espectro reporta a oitava errada com frequência. O detetor aqui é o
-[MPM](http://www.cs.otago.ac.nz/tartini/papers/A_Smarter_Way_to_Find_Pitch.pdf) (NSDF, McLeod &
-Wyvill), que mede periodicidade em vez de energia — que é o que "a nota" realmente significa. A
-FFT continua lá, mas só para o espectro no ecrã.
+The defaults assume standard tuning at 440 Hz. The guided setup measures what your guitar
+actually produces (the median of twelve readings per note, which ignores the attack transient)
+and listens for that instead, so nylon strings, old strings and a guitar tuned slightly flat all
+just work. It is stored in `localStorage`; **Setup** re-runs it at any time.
 
-**As oito notas não têm oitavas entre si.** Nenhum par do conjunto está separado por 12, 19 ou 24
-semitons. Isto é deliberado: se houvesse uma oitava no conjunto, um erro de deteção produziria
-uma casa *diferente mas válida* — o pior tipo de bug, porque ninguém dá por ele. Como está, um
-salto de oitava cai fora de todas as janelas e é simplesmente ignorado.
+The **Advanced** panel has the knobs if you want them:
 
-**Rearme por ataque, não só por silêncio.** Casas como `a1` ou `e5` precisam da mesma nota duas
-vezes seguidas, por isso não basta esperar que o pitch mude. O detetor rearma quando a amplitude
-sobe de repente (uma palhetada nova) ou quando cai abaixo do limiar.
-
-**Decimação por 2 antes da análise.** O sinal é filtrado a 2 kHz e decimado, o que corta o custo
-da NSDF para cerca de meio milhão de multiplicações por análise (~23 ms) — corre folgado dentro
-do AudioWorklet, sem tocar no thread do UI.
-
-**Stockfish single-thread.** A versão com threads precisa de `SharedArrayBuffer`, que precisa de
-cabeçalhos COOP/COEP, que o GitHub Pages não envia. Esta versão funciona em qualquer host
-estático.
+- **Noise gate** — set automatically from two seconds of room noise during setup. Raise it in a
+  loud room; lower it if you have to dig in hard to be heard.
+- **Pitch tolerance** — the acceptance window in cents. The notes are 300 cents apart, so the
+  default 100 is generous and still unambiguous.
+- **Type a move instead** — enter `e2e4` by keyboard. Useful for testing, and for rescuing a demo
+  when a string breaks.
 
 ---
 
-## Estrutura
+## Why it is built this way
+
+**Autocorrelation, not an FFT peak.** On a guitar the fundamental of a wound low string is often
+*weaker* than its second or third harmonic. A detector that picks the tallest bin in the spectrum
+reports the wrong octave constantly. This uses
+[MPM](http://www.cs.otago.ac.nz/tartini/papers/A_Smarter_Way_to_Find_Pitch.pdf) (the NSDF, McLeod
+& Wyvill), which measures periodicity instead of energy — which is what "the note" actually
+means. The FFT is still there, but only to draw the spectrum.
+
+**No octaves inside the note set.** No two notes in the set are 12, 19 or 24 semitones apart.
+This is deliberate: with an octave pair in the set, a detection slip would produce a *different
+but perfectly valid* square — the worst kind of bug, because nobody notices it. As it is, an
+octave slip falls outside every acceptance window and is simply ignored.
+
+**Re-arm on attack, not only on silence.** Squares like `a1` and `e5` need the same note twice in
+a row, so waiting for the pitch to change is not enough. The detector re-arms when the amplitude
+jumps (a fresh pluck) as well as when it falls below the gate.
+
+**Decimate by 2 before analysing.** The signal is low-passed at 2 kHz and decimated, which brings
+the NSDF down to about half a million multiplies per analysis (every 23 ms) — comfortable inside
+an AudioWorklet, and it never touches the UI thread.
+
+**Single-threaded Stockfish.** The threaded build needs `SharedArrayBuffer`, which needs
+COOP/COEP headers, which GitHub Pages does not send. This build runs on any static host.
+
+---
+
+## Layout
 
 ```
-index.html              layout e controlos
+index.html              markup and controls
 css/app.css
 src/audio/
-  pitch-processor.js    AudioWorklet: NSDF/MPM (sem imports, carregado como módulo de worklet)
-  audio-engine.js       getUserMedia, filtros, grafo de áudio, AnalyserNode
-  note-detector.js      frames -> eventos de nota (debounce, rearme, período refratário)
-  notes.js              teoria musical, conjunto de notas, mapeamento nota -> coordenada
+  pitch-processor.js    AudioWorklet: NSDF/MPM (no imports - loaded as a worklet module)
+  audio-engine.js       getUserMedia, filter chain, AnalyserNode
+  note-detector.js      frames -> note events (debounce, re-arm, refractory period)
+  notes.js              music theory, the note set, note -> coordinate mapping
 src/game/
-  game.js               wrapper sobre chess.js
-  move-builder.js       quatro notas -> uma jogada, com validação pelas regras
-  engine-stockfish.js   UCI sobre Web Worker
-src/ui/                 tabuleiro, afinador, espectro, legenda, calibração
-test/pitch-test.html    testes do detetor com sinais sintéticos
-vendor/                 dependências, versionadas no repo de propósito
+  game.js               chess.js wrapper
+  move-builder.js       four notes -> one move, validated against the rules
+  engine-stockfish.js   UCI over a Web Worker
+src/ui/
+  board-ui.js           board and move hints
+  fretboard.js          the neck diagram
+  onboarding.js         guided setup: input, note learning, drill
+  game-meta.js          evaluation bar and captured pieces
+  tuner.js, spectrum.js
+test/pitch-test.html    detector tests against synthetic signals
+vendor/                 dependencies, committed on purpose
 ```
 
-`window.guitarChess` expõe `game`, `mapper`, `detector`, `audio` e `engine` na consola — é
-metade da história quando se depura áudio.
+`window.guitarChess` exposes `game`, `mapper`, `detector`, `audio` and `engine` in the console —
+with an audio app that is half the debugging story.
 
 ---
 
-## Testes
+## Tests
 
-Abre <http://localhost:8000/test/pitch-test.html>.
+Open <http://localhost:8000/test/pitch-test.html>.
 
-Gera sinais de corda dedilhada sintéticos para as nove notas, incluindo o caso difícil da
-fundamental mais fraca que os harmónicos, e verifica que a frequência detetada cai bem dentro da
-janela de aceitação (na prática, dentro de 0.1 cents) e que ruído de fundo não produz notas.
+It synthesises plucked-string signals for all nine notes, including the hard case where the
+fundamental is quieter than the harmonics, and checks that the detected pitch lands well inside
+the acceptance window (in practice within 0.1 cents) and that background noise produces no notes.
 
 ---
 
-## Dependências
+## Dependencies
 
-Estão em `vendor/`, versionadas de propósito: sem npm, sem CDN, funciona offline e não parte se
-uma versão for despublicada. Versões e licenças em [THIRD-PARTY.md](THIRD-PARTY.md).
+Committed under `vendor/` on purpose: no npm, no CDN, works offline, and cannot break because a
+version was unpublished. Versions and licences in [THIRD-PARTY.md](THIRD-PARTY.md).
 
-- [chess.js](https://github.com/jhlywa/chess.js) — regras (BSD-2-Clause)
-- [cm-chessboard](https://github.com/shaack/cm-chessboard) — tabuleiro (MIT)
-- [stockfish.js](https://github.com/nmrugg/stockfish.js) — motor (GPL-3.0)
+- [chess.js](https://github.com/jhlywa/chess.js) — rules (BSD-2-Clause)
+- [cm-chessboard](https://github.com/shaack/cm-chessboard) — board (MIT)
+- [stockfish.js](https://github.com/nmrugg/stockfish.js) — engine (GPL-3.0)
 
-## Licença
+## Licence
 
-GPL-3.0-or-later — ver [LICENSE](LICENSE). O projeto distribui o Stockfish, que é GPL, por isso
-o conjunto tem de o ser também.
+GPL-3.0-or-later — see [LICENSE](LICENSE). The project ships Stockfish, which is GPL, so the
+whole thing has to be.

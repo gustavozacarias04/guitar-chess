@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Guitar Chess — teste do detetor de pitch</title>
+<title>Guitar Chess — pitch detector tests</title>
 <style>
     body { font-family: system-ui, sans-serif; background: #11151c; color: #e7edf5; margin: 0; padding: 28px; }
     h1 { font-size: 1.2rem; }
@@ -17,14 +17,14 @@
 </style>
 </head>
 <body>
-<h1>Teste do detetor de pitch</h1>
+<h1>Pitch detector tests</h1>
 <p>
-    Gera sinais sintéticos com o perfil harmónico de uma corda dedilhada — incluindo o caso
-    difícil, em que a <b>fundamental é mais fraca que o 2º e o 3º harmónico</b>, que é
-    exatamente o que faz um detetor por FFT reportar a oitava errada numa corda grave.
-    Corre o mesmo <code>pitch-processor.js</code> que a aplicação usa.
+    Synthesises signals with the harmonic profile of a plucked string — including the hard
+    case where the <b>fundamental is weaker than the 2nd and 3rd harmonics</b>, which is exactly
+    what makes an FFT peak detector report the wrong octave on a low string.
+    Runs the same <code>pitch-processor.js</code> the app uses.
 </p>
-<div id="output">a correr…</div>
+<div id="output">running…</div>
 
 <script type="module">
 import { DEFAULT_NOTE_SET, DEFAULT_CANCEL_NOTE, midiToFreq, midiToName, cents } from "../src/audio/notes.js"
@@ -122,10 +122,10 @@ for (const midi of cases) {
         if (!ok) failures++
         rows.push(`<tr>
             <td>${midiToName(midi)}</td>
-            <td>${weakFundamental ? "fundamental fraca" : "normal"}</td>
+            <td>${weakFundamental ? "weak fundamental" : "normal"}</td>
             <td>${expected.toFixed(1)} Hz</td>
             <td>${median ? median.toFixed(1) + " Hz" : "—"}</td>
-            <td class="${ok ? "ok" : "fail"}">${median ? (error >= 0 ? "+" : "") + error.toFixed(1) + " ct" : "nada detetado"}</td>
+            <td class="${ok ? "ok" : "fail"}">${median ? (error >= 0 ? "+" : "") + error.toFixed(1) + " ct" : "nothing detected"}</td>
             <td>${detections.length} frames</td>
         </tr>`)
     }
@@ -136,16 +136,16 @@ const quiet = new Float32Array(SAMPLE_RATE).map(() => (Math.random() - 0.5) * 0.
 const quietDetections = feed(makeProcessor, quiet)
 const quietOk = quietDetections.length === 0
 if (!quietOk) failures++
-rows.push(`<tr><td>silêncio</td><td>ruído de fundo</td><td>—</td><td>—</td>
-    <td class="${quietOk ? "ok" : "fail"}">${quietOk ? "ignorado" : quietDetections.length + " deteções"}</td><td></td></tr>`)
+rows.push(`<tr><td>silence</td><td>background noise</td><td>—</td><td>—</td>
+    <td class="${quietOk ? "ok" : "fail"}">${quietOk ? "ignored" : quietDetections.length + " detections"}</td><td></td></tr>`)
 
 document.querySelector("#output").innerHTML = `
     <table>
-        <thead><tr><th>Nota</th><th>Sinal</th><th>Esperado</th><th>Detetado</th><th>Erro</th><th></th></tr></thead>
+        <thead><tr><th>Note</th><th>Signal</th><th>Expected</th><th>Detected</th><th>Error</th><th></th></tr></thead>
         <tbody>${rows.join("")}</tbody>
     </table>
     <p class="summary" style="color:${failures ? "#ff7b7b" : "#7ce0a8"}">
-        ${failures ? failures + " falha(s)" : "Todos os testes passaram"}
+        ${failures ? failures + " failure(s)" : "All tests passed"}
     </p>`
 window.__testFailures = failures
 </script>

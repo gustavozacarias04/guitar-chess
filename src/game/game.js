@@ -71,12 +71,12 @@ export class Game extends EventTarget {
     /** Human readable end-of-game reason, or null. */
     get outcome() {
         if (!this.chess.isGameOver()) return null
-        if (this.chess.isCheckmate()) return this.chess.turn() === "w" ? "Xeque-mate — as pretas ganham" : "Xeque-mate — as brancas ganham"
-        if (this.chess.isStalemate()) return "Empate por afogamento"
-        if (this.chess.isThreefoldRepetition()) return "Empate por repetição"
-        if (this.chess.isInsufficientMaterial()) return "Empate por material insuficiente"
-        if (this.chess.isDraw()) return "Empate (regra dos 50 lances)"
-        return "Fim de jogo"
+        if (this.chess.isCheckmate()) return this.chess.turn() === "w" ? "Checkmate — Black wins" : "Checkmate — White wins"
+        if (this.chess.isStalemate()) return "Stalemate — draw"
+        if (this.chess.isThreefoldRepetition()) return "Draw by repetition"
+        if (this.chess.isInsufficientMaterial()) return "Draw — insufficient material"
+        if (this.chess.isDraw()) return "Draw — fifty-move rule"
+        return "Game over"
     }
 
     get inCheck() {

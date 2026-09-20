@@ -20,7 +20,7 @@ export class Tuner {
                 <div class="tuner-readout">
                     <span data-role="hz">-- Hz</span>
                     <span data-role="cents">-- ct</span>
-                    <span data-role="clarity">clareza --</span>
+                    <span data-role="clarity">clarity --</span>
                 </div>
                 <div class="level-bar"><div data-role="level"></div></div>
             </div>`
@@ -47,7 +47,7 @@ export class Tuner {
             this.els.slot.textContent = ""
             this.els.hz.textContent = "-- Hz"
             this.els.cents.textContent = "-- ct"
-            this.els.clarity.textContent = `clareza ${clarity ? clarity.toFixed(2) : "--"}`
+            this.els.clarity.textContent = `clarity ${clarity ? clarity.toFixed(2) : "--"}`
             this.els.needle.style.left = "50%"
             this.root.classList.remove("is-mapped")
             return
@@ -56,16 +56,16 @@ export class Tuner {
         this.els.note.textContent = described.name
         this.els.hz.textContent = `${frequency.toFixed(1)} Hz`
         this.els.cents.textContent = `${described.cents >= 0 ? "+" : ""}${described.cents.toFixed(0)} ct`
-        this.els.clarity.textContent = `clareza ${clarity.toFixed(2)}`
+        this.els.clarity.textContent = `clarity ${clarity.toFixed(2)}`
         // The needle shows tuning against the nearest chromatic note, clamped to +/-50 ct.
         const position = 50 + Math.max(-50, Math.min(50, described.cents))
         this.els.needle.style.left = `${position}%`
 
         if (match) {
-            this.els.slot.textContent = this.mapper.isCancel(match.slot) ? "cancelar" : this.mapper.coordinateLabel(match.slot)
+            this.els.slot.textContent = this.mapper.isCancel(match.slot) ? "cancel" : this.mapper.coordinateLabel(match.slot)
             this.root.classList.add("is-mapped")
         } else {
-            this.els.slot.textContent = "fora do conjunto"
+            this.els.slot.textContent = "not in the set"
             this.root.classList.remove("is-mapped")
         }
     }

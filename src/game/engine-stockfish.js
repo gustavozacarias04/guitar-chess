@@ -13,11 +13,11 @@ const JS_WORKER = new URL("../../vendor/stockfish/stockfish.js", import.meta.url
 
 /** Skill Level is Stockfish's own handicap knob; 0 blunders a lot, 20 is full strength. */
 export const LEVELS = [
-    { id: "iniciante", label: "Iniciante", skill: 0, movetime: 150, depth: 1 },
-    { id: "facil", label: "Fácil", skill: 3, movetime: 300, depth: 4 },
-    { id: "medio", label: "Médio", skill: 8, movetime: 600, depth: 8 },
-    { id: "dificil", label: "Difícil", skill: 14, movetime: 1200, depth: 14 },
-    { id: "maximo", label: "Máximo", skill: 20, movetime: 2500, depth: 0 }
+    { id: "beginner", label: "Beginner", skill: 0, movetime: 150, depth: 1 },
+    { id: "easy", label: "Easy", skill: 3, movetime: 300, depth: 4 },
+    { id: "club", label: "Club", skill: 8, movetime: 600, depth: 8 },
+    { id: "strong", label: "Strong", skill: 14, movetime: 1200, depth: 14 },
+    { id: "max", label: "Full strength", skill: 20, movetime: 2500, depth: 0 }
 ]
 
 export class StockfishEngine extends EventTarget {

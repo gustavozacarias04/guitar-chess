@@ -1,102 +1,138 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Guitar Chess — xadrez tocado à guitarra</title>
-<meta name="description" content="Joga xadrez tocando notas na guitarra: o browser ouve, deteta a frequência e traduz cada quatro notas numa jogada.">
+<title>Guitar Chess — play chess on your guitar</title>
+<meta name="description" content="Play chess by playing your guitar. The browser listens, detects each note and turns every four notes into a move. No install, no build, runs entirely in the browser.">
+<meta property="og:title" content="Guitar Chess">
+<meta property="og:description" content="Play chess by playing your guitar. Four notes make a move.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#9822;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="vendor/cm-chessboard/assets/chessboard.css">
 <link rel="stylesheet" href="vendor/cm-chessboard/assets/extensions/markers/markers.css">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<header class="app-header">
-    <h1>Guitar&nbsp;Chess</h1>
-    <p>Quatro notas por jogada: <b>coluna</b>, <b>linha</b> da peça, depois <b>coluna</b>, <b>linha</b> do destino.</p>
+
+<header class="topbar">
+    <div class="brand">
+        <span class="brand-mark">&#9822;</span>
+        <span class="brand-name">Guitar&nbsp;Chess</span>
+    </div>
+    <div class="topbar-actions">
+        <label class="inline-field">
+            <span>Engine</span>
+            <select id="level"></select>
+        </label>
+        <label class="inline-field">
+            <span>You play</span>
+            <select id="side">
+                <option value="w">White</option>
+                <option value="b">Black</option>
+            </select>
+        </label>
+        <button type="button" id="new-game" class="ghost">New game</button>
+        <button type="button" id="setup" class="ghost">Setup</button>
+        <button type="button" id="stage" class="ghost" title="Hide everything but the board and the neck">Stage mode</button>
+    </div>
 </header>
 
-<main class="layout">
-    <section class="panel panel-board">
-        <div id="board" class="board"></div>
-        <div class="move-state">
-            <div id="pending" class="pending" aria-label="notas recebidas">
-                <span>·</span><span>·</span><span>·</span><span>·</span>
+<main class="stage-layout">
+
+    <section class="board-column">
+        <div class="board-frame">
+            <div id="eval" class="eval"></div>
+            <div class="board-stack">
+                <div class="captured" id="captured-top"></div>
+                <div id="board" class="board"></div>
+                <div class="captured" id="captured-bottom"></div>
             </div>
-            <p id="status" data-kind="info">A carregar…</p>
         </div>
-        <div class="row">
-            <button type="button" id="listen" class="primary">Ouvir</button>
-            <button type="button" id="clear-move">Limpar jogada</button>
-            <button type="button" id="undo">Recuar</button>
-            <button type="button" id="new-game">Novo jogo</button>
+
+        <div class="entry">
+            <div class="entry-slots" id="pending" aria-label="notes heard so far">
+                <span class="slot" data-index="0"><b>·</b><small>from file</small></span>
+                <span class="slot" data-index="1"><b>·</b><small>from rank</small></span>
+                <span class="entry-arrow">&rarr;</span>
+                <span class="slot" data-index="2"><b>·</b><small>to file</small></span>
+                <span class="slot" data-index="3"><b>·</b><small>to rank</small></span>
+            </div>
+            <p id="status" data-kind="info">Loading…</p>
         </div>
     </section>
 
-    <section class="panel panel-side">
-        <div class="card">
-            <h2>Entrada de áudio</h2>
-            <label>Dispositivo
-                <select id="device"></select>
-            </label>
-            <div id="tuner"></div>
-            <canvas id="spectrum" height="110" aria-label="espectro do sinal"></canvas>
-            <label class="slider">Limiar de ruído <span id="gate-value" class="value"></span>
-                <input type="range" id="gate" min="0.002" max="0.08" step="0.001">
-            </label>
-            <label class="slider">Tolerância <span id="tolerance-value" class="value"></span>
-                <input type="range" id="tolerance" min="30" max="140" step="5">
-            </label>
-            <div class="row">
-                <button type="button" id="calibrate">Calibrar notas</button>
-                <button type="button" id="reset-calibration">Repor</button>
+    <section class="side-column">
+        <div class="card neck-card">
+            <div class="card-head">
+                <h2>Your neck</h2>
+                <span class="card-hint">first note = file &middot; second note = rank</span>
             </div>
+            <div id="fretboard"></div>
         </div>
 
-        <div class="card">
-            <h2>Jogo</h2>
-            <div class="grid-2">
-                <label>Motor
-                    <select id="level"></select>
-                </label>
-                <label>Jogas com
-                    <select id="side">
-                        <option value="w">Brancas</option>
-                        <option value="b">Pretas</option>
-                    </select>
-                </label>
-                <label>Promoção
-                    <select id="promotion">
-                        <option value="q">Dama</option>
-                        <option value="r">Torre</option>
-                        <option value="b">Bispo</option>
-                        <option value="n">Cavalo</option>
-                    </select>
-                </label>
-                <label>Sem guitarra
-                    <input type="text" id="manual-move" placeholder="e2e4" maxlength="4" autocomplete="off" spellcheck="false">
-                </label>
+        <div class="card pitch-card">
+            <div id="tuner"></div>
+        </div>
+
+        <div class="card moves-card">
+            <div class="card-head">
+                <h2>Moves</h2>
+                <div class="card-actions">
+                    <button type="button" id="clear-move" class="mini">Clear</button>
+                    <button type="button" id="undo" class="mini">Take back</button>
+                </div>
             </div>
             <ol id="history" class="history"></ol>
         </div>
 
-        <div class="card">
-            <h2>As notas</h2>
-            <div id="legend"></div>
-        </div>
+        <details class="card advanced">
+            <summary>Advanced</summary>
+            <div class="advanced-body">
+                <label>Input device
+                    <select id="device"></select>
+                </label>
+                <canvas id="spectrum" height="96" aria-label="input spectrum"></canvas>
+                <label class="slider">Noise gate <span id="gate-value" class="value"></span>
+                    <input type="range" id="gate" min="0.002" max="0.08" step="0.001">
+                </label>
+                <label class="slider">Pitch tolerance <span id="tolerance-value" class="value"></span>
+                    <input type="range" id="tolerance" min="30" max="140" step="5">
+                </label>
+                <label>Promote pawns to
+                    <select id="promotion">
+                        <option value="q">Queen</option>
+                        <option value="r">Rook</option>
+                        <option value="b">Bishop</option>
+                        <option value="n">Knight</option>
+                    </select>
+                </label>
+                <label>Type a move instead
+                    <input type="text" id="manual-move" placeholder="e2e4" maxlength="4" autocomplete="off" spellcheck="false">
+                </label>
+                <div class="row">
+                    <button type="button" id="listen" class="mini">Stop listening</button>
+                    <button type="button" id="reset-calibration" class="mini">Reset calibration</button>
+                </div>
+            </div>
+        </details>
     </section>
 </main>
 
-<footer class="app-footer">
+<footer class="footer">
     <p>
-        Software livre sob <a href="LICENSE">GPL-3.0</a> ·
-        motor <a href="https://stockfishchess.org/">Stockfish</a> ·
-        regras <a href="https://github.com/jhlywa/chess.js">chess.js</a> ·
-        tabuleiro <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a>
+        Free software under <a href="https://github.com/gustavozacarias04/guitar-chess/blob/main/LICENSE">GPL-3.0</a>
+        · <a href="https://github.com/gustavozacarias04/guitar-chess">source</a>
+        · engine <a href="https://stockfishchess.org/">Stockfish</a>
+        · rules <a href="https://github.com/jhlywa/chess.js">chess.js</a>
+        · board <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a>
     </p>
 </footer>
 
-<div id="calibration" class="overlay" hidden></div>
+<div id="onboarding" class="overlay" hidden></div>
+<button type="button" id="stage-exit" class="stage-exit" hidden>Exit stage mode</button>
 
 <script type="module" src="src/main.js"></script>
 </body>
