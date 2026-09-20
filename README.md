@@ -1,4 +1,4 @@
-# Fretboard Chess
+# Guitar Chess
 
 Joga xadrez tocando guitarra. O browser ouve o microfone (ou a entrada de linha / interface
 áudio), deteta a frequência de cada nota e traduz cada quatro notas numa jogada.
@@ -137,7 +137,7 @@ test/pitch-test.html    testes do detetor com sinais sintéticos
 vendor/                 dependências, versionadas no repo de propósito
 ```
 
-`window.fretboardChess` expõe `game`, `mapper`, `detector`, `audio` e `engine` na consola — é
+`window.guitarChess` expõe `game`, `mapper`, `detector`, `audio` e `engine` na consola — é
 metade da história quando se depura áudio.
 
 ---

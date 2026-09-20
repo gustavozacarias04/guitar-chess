@@ -36,7 +36,7 @@ def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     handler = partial(Handler, directory=str(Path(__file__).parent))
     server = ThreadingHTTPServer(("127.0.0.1", port), handler)
-    print(f"Fretboard Chess -> http://localhost:{port}  (Ctrl+C para parar)")
+    print(f"Guitar Chess -> http://localhost:{port}  (Ctrl+C para parar)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

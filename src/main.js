@@ -1,5 +1,5 @@
 /**
- * Fretboard Chess - play chess by playing your guitar.
+ * Guitar Chess - play chess by playing your guitar.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -16,7 +16,7 @@ import { Spectrum } from "./ui/spectrum.js"
 import { NoteLegend } from "./ui/note-legend.js"
 import { Calibration } from "./ui/calibration.js"
 
-const STORAGE_KEY = "fretboard-chess:settings"
+const STORAGE_KEY = "guitar-chess:settings"
 
 const $ = (selector) => document.querySelector(selector)
 
@@ -380,7 +380,7 @@ $("#manual-move").addEventListener("keydown", async (event) => {
 
 // Exposed on purpose: with an audio app, being able to poke at the detector
 // and the mapper from the browser console is half the debugging story.
-window.fretboardChess = { game, mapper, detector, builder, audio, engine, board, calibration }
+window.guitarChess = { game, mapper, detector, builder, audio, engine, board, calibration }
 
 board.setOrientation(humanColor)
 renderPending({ slots: [] })
