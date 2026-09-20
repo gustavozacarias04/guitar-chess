@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fretboard Chess — xadrez tocado à guitarra</title>
+<meta name="description" content="Joga xadrez tocando notas na guitarra: o browser ouve, deteta a frequência e traduz cada quatro notas numa jogada.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#9822;</text></svg>">
+<link rel="stylesheet" href="vendor/cm-chessboard/assets/chessboard.css">
+<link rel="stylesheet" href="vendor/cm-chessboard/assets/extensions/markers/markers.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="app-header">
+    <h1>Fretboard&nbsp;Chess</h1>
+    <p>Quatro notas por jogada: <b>coluna</b>, <b>linha</b> da peça, depois <b>coluna</b>, <b>linha</b> do destino.</p>
+</header>
+
+<main class="layout">
+    <section class="panel panel-board">
+        <div id="board" class="board"></div>
+        <div class="move-state">
+            <div id="pending" class="pending" aria-label="notas recebidas">
+                <span>·</span><span>·</span><span>·</span><span>·</span>
+            </div>
+            <p id="status" data-kind="info">A carregar…</p>
+        </div>
+        <div class="row">
+            <button type="button" id="listen" class="primary">Ouvir</button>
+            <button type="button" id="clear-move">Limpar jogada</button>
+            <button type="button" id="undo">Recuar</button>
+            <button type="button" id="new-game">Novo jogo</button>
+        </div>
+    </section>
+
+    <section class="panel panel-side">
+        <div class="card">
+            <h2>Entrada de áudio</h2>
+            <label>Dispositivo
+                <select id="device"></select>
+            </label>
+            <div id="tuner"></div>
+            <canvas id="spectrum" height="110" aria-label="espectro do sinal"></canvas>
+            <label class="slider">Limiar de ruído <span id="gate-value" class="value"></span>
+                <input type="range" id="gate" min="0.002" max="0.08" step="0.001">
+            </label>
+            <label class="slider">Tolerância <span id="tolerance-value" class="value"></span>
+                <input type="range" id="tolerance" min="30" max="140" step="5">
+            </label>
+            <div class="row">
+                <button type="button" id="calibrate">Calibrar notas</button>
+                <button type="button" id="reset-calibration">Repor</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Jogo</h2>
+            <div class="grid-2">
+                <label>Motor
+                    <select id="level"></select>
+                </label>
+                <label>Jogas com
+                    <select id="side">
+                        <option value="w">Brancas</option>
+                        <option value="b">Pretas</option>
+                    </select>
+                </label>
+                <label>Promoção
+                    <select id="promotion">
+                        <option value="q">Dama</option>
+                        <option value="r">Torre</option>
+                        <option value="b">Bispo</option>
+                        <option value="n">Cavalo</option>
+                    </select>
+                </label>
+                <label>Sem guitarra
+                    <input type="text" id="manual-move" placeholder="e2e4" maxlength="4" autocomplete="off" spellcheck="false">
+                </label>
+            </div>
+            <ol id="history" class="history"></ol>
+        </div>
+
+        <div class="card">
+            <h2>As notas</h2>
+            <div id="legend"></div>
+        </div>
+    </section>
+</main>
+
+<footer class="app-footer">
+    <p>
+        Software livre sob <a href="LICENSE">GPL-3.0</a> ·
+        motor <a href="https://stockfishchess.org/">Stockfish</a> ·
+        regras <a href="https://github.com/jhlywa/chess.js">chess.js</a> ·
+        tabuleiro <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a>
+    </p>
+</footer>
+
+<div id="calibration" class="overlay" hidden></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

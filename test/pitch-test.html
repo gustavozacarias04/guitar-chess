@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Fretboard Chess — teste do detetor de pitch</title>
+<style>
+    body { font-family: system-ui, sans-serif; background: #11151c; color: #e7edf5; margin: 0; padding: 28px; }
+    h1 { font-size: 1.2rem; }
+    p { color: #8f9db1; max-width: 70ch; line-height: 1.6; font-size: 0.9rem; }
+    table { border-collapse: collapse; margin-top: 18px; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 5px 14px 5px 0; border-bottom: 1px solid #2a3442; }
+    th { color: #8f9db1; font-weight: 500; }
+    td.ok { color: #7ce0a8; }
+    td.fail { color: #ff7b7b; }
+    .summary { margin-top: 18px; font-size: 1rem; }
+    code { color: #ffd166; }
+</style>
+</head>
+<body>
+<h1>Teste do detetor de pitch</h1>
+<p>
+    Gera sinais sintéticos com o perfil harmónico de uma corda dedilhada — incluindo o caso
+    difícil, em que a <b>fundamental é mais fraca que o 2º e o 3º harmónico</b>, que é
+    exatamente o que faz um detetor por FFT reportar a oitava errada numa corda grave.
+    Corre o mesmo <code>pitch-processor.js</code> que a aplicação usa.
+</p>
+<div id="output">a correr…</div>
+
+<script type="module">
+import { DEFAULT_NOTE_SET, DEFAULT_CANCEL_NOTE, midiToFreq, midiToName, cents } from "../src/audio/notes.js"
+import { DEFAULT_DETECTOR_OPTIONS } from "../src/audio/note-detector.js"
+
+const SAMPLE_RATE = 44100
+
+/**
+ * Load the AudioWorklet file outside a worklet by stubbing what it expects,
+ * and hand back a factory. Each case gets a fresh processor: the internal ring
+ * buffer holds ~70 ms of audio, so reusing one would let the tail of the
+ * previous note leak into the first analyses of the next.
+ */
+async function loadProcessorFactory() {
+    const source = await fetch("../src/audio/pitch-processor.js").then((r) => r.text())
+    const build = new Function(
+        "AudioWorkletProcessor", "registerProcessor", "sampleRate", "currentTime",
+        source + "\nreturn PitchProcessor"
+    )
+    return () => {
+        const frames = []
+        class FakeProcessor {
+            constructor() {
+                this.port = { postMessage: (message) => frames.push(message), onmessage: null }
+            }
+        }
+        const ProcessorClass = build(FakeProcessor, () => {}, SAMPLE_RATE, 0)
+        return { instance: new ProcessorClass(), frames }
+    }
+}
+
+/**
+ * A plucked string: harmonics with independent decay, and a fundamental that
+ * is deliberately quieter than the harmonics above it.
+ */
+function pluck(frequency, seconds, { weakFundamental = true } = {}) {
+    const length = Math.round(seconds * SAMPLE_RATE)
+    const out = new Float32Array(length)
+    const partials = weakFundamental
+        ? [0.25, 1.0, 0.7, 0.35, 0.2, 0.12]
+        : [1.0, 0.5, 0.25, 0.12, 0.06, 0.03]
+    for (let i = 0; i < length; i++) {
+        const t = i / SAMPLE_RATE
+        let value = 0
+        for (let h = 0; h < partials.length; h++) {
+            const partialFreq = frequency * (h + 1)
+            if (partialFreq > SAMPLE_RATE / 2) break
+            value += partials[h] * Math.sin(2 * Math.PI * partialFreq * t) * Math.exp(-t * (1.1 + h * 0.5))
+        }
+        out[i] = value * 0.25 + (Math.random() - 0.5) * 0.002
+    }
+    // Emulate the two 2 kHz biquads the real graph puts in front of the worklet.
+    let state = 0
+    const alpha = 1 - Math.exp((-2 * Math.PI * 2000) / SAMPLE_RATE)
+    for (let pass = 0; pass < 2; pass++) {
+        state = 0
+        for (let i = 0; i < length; i++) {
+            state += alpha * (out[i] - state)
+            out[i] = state
+        }
+    }
+    return out
+}
+
+function feed(makeProcessor, signal) {
+    const { instance: processor, frames } = makeProcessor()
+    const block = new Float32Array(128)
+    for (let offset = 0; offset + 128 <= signal.length; offset += 128) {
+        block.set(signal.subarray(offset, offset + 128))
+        processor.process([[block]])
+    }
+    // Same acceptance rule the running app uses, so the test measures the
+    // pipeline rather than the raw processor.
+    return frames.filter((f) =>
+        f.frequency > 0 &&
+        f.clarity >= DEFAULT_DETECTOR_OPTIONS.clarityThreshold &&
+        f.rms >= DEFAULT_DETECTOR_OPTIONS.rmsGate)
+}
+
+const makeProcessor = await loadProcessorFactory()
+const rows = []
+let failures = 0
+
+const cases = [...DEFAULT_NOTE_SET, DEFAULT_CANCEL_NOTE]
+for (const midi of cases) {
+    for (const weakFundamental of [true, false]) {
+        const expected = midiToFreq(midi)
+        const detections = feed(makeProcessor, pluck(expected, 1.2, { weakFundamental }))
+        const usable = detections.slice(2, 14) // skip the attack transient
+        const median = usable.length
+            ? [...usable.map((d) => d.frequency)].sort((a, b) => a - b)[Math.floor(usable.length / 2)]
+            : 0
+        const error = median ? cents(median, expected) : NaN
+        const ok = Math.abs(error) < 35 // must land well inside the +/-100 ct window
+        if (!ok) failures++
+        rows.push(`<tr>
+            <td>${midiToName(midi)}</td>
+            <td>${weakFundamental ? "fundamental fraca" : "normal"}</td>
+            <td>${expected.toFixed(1)} Hz</td>
+            <td>${median ? median.toFixed(1) + " Hz" : "—"}</td>
+            <td class="${ok ? "ok" : "fail"}">${median ? (error >= 0 ? "+" : "") + error.toFixed(1) + " ct" : "nada detetado"}</td>
+            <td>${detections.length} frames</td>
+        </tr>`)
+    }
+}
+
+// Silence must not produce notes.
+const quiet = new Float32Array(SAMPLE_RATE).map(() => (Math.random() - 0.5) * 0.004)
+const quietDetections = feed(makeProcessor, quiet)
+const quietOk = quietDetections.length === 0
+if (!quietOk) failures++
+rows.push(`<tr><td>silêncio</td><td>ruído de fundo</td><td>—</td><td>—</td>
+    <td class="${quietOk ? "ok" : "fail"}">${quietOk ? "ignorado" : quietDetections.length + " deteções"}</td><td></td></tr>`)
+
+document.querySelector("#output").innerHTML = `
+    <table>
+        <thead><tr><th>Nota</th><th>Sinal</th><th>Esperado</th><th>Detetado</th><th>Erro</th><th></th></tr></thead>
+        <tbody>${rows.join("")}</tbody>
+    </table>
+    <p class="summary" style="color:${failures ? "#ff7b7b" : "#7ce0a8"}">
+        ${failures ? failures + " falha(s)" : "Todos os testes passaram"}
+    </p>`
+window.__testFailures = failures
+</script>
+</body>
+</html>
